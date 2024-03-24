@@ -1,0 +1,15 @@
+{
+  "name": "stats-bot",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "^0.6.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.11.0",
+    "systeminformation": "^5.18.1"
+  }
+}
