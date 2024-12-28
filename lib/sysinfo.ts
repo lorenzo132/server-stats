@@ -23,20 +23,40 @@ function formatUptime(uptime: number): string {
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
+async function getGpuStats() {
+  const gpu = await systemInformation.graphics();
+  const gpuData: string[] = [];
+
+  gpu.controllers.forEach((controller) => {
+    const usedMemory = controller.memoryUsed;
+    const totalMemory = controller.vram;
+
+    if (usedMemory) {
+      gpuData.push(
+        `${controller.model} | Usage: ${usedMemory}MB/${totalMemory}MB`
+      );
+    } else {
+      gpuData.push(`${controller.model} | Total: ${totalMemory}MB`);
+    }
+  });
+
+  return gpuData.join("\n");
+}
+
 export default async function getSystemStats(): Promise<string> {
   let toSendData = "```prolog\n";
 
-  //   CPU Information
+  // CPU Information
   const cpuData = await systemInformation.cpu();
   const currentLoad = await systemInformation.currentLoad();
   toSendData += `CPU: ${cpuData.manufacturer} ${cpuData.brand} (${
     cpuData.speed
-  } GHz)\nCPU Usage: ${currentLoad.currentLoad.toFixed(2)}%\n\nCores: ${
+  } GHz)\nCPU Usage: ${currentLoad.currentLoad.toFixed(2)}%\n\nCores: $(
     cpuData.physicalCores
-  }P | ${cpuData.cores}T`;
+  )P | ${cpuData.cores}T`;
   toSendData += SEPARATOR;
 
-  //   Memory Information
+  // Memory Information
   const memory = await systemInformation.mem();
   const memoryLayout = await systemInformation.memLayout();
   toSendData += `Memory (${memoryLayout.length}):\n`;
@@ -62,39 +82,18 @@ export default async function getSystemStats(): Promise<string> {
   )} | Free: ${formatBytes(diskFree, 2)}`;
   toSendData += SEPARATOR;
 
-  // GPU Information
-  const gpu = await systemInformation.graphics();
-  toSendData += `GPU (${gpu.controllers.length}):\n`;
-
-  const gpuData: string[] = [];
-
-  gpu.controllers.forEach((controller) => {
-    const usedMemory = controller.memoryUsed;
-    const totalMemory = controller.vram;
-
-    if (usedMemory) {
-      gpuData.push(
-        `${controller.model} | Usage: ${usedMemory}MB/${totalMemory}MB`
-      );
-    } else {
-      gpuData.push(`${controller.model} | Total: ${totalMemory}MB`);
-    }
-  });
-  toSendData += gpuData.join("\n");
+  // GPU Information (Updated in real-time)
+  toSendData += `GPU Stats:\n`;
+  toSendData += await getGpuStats();
   toSendData += SEPARATOR;
 
   // Network Information
-  await systemInformation.networkStats();
-  await systemInformation.networkStats();
-  await systemInformation.networkStats();
   const networkStats = await systemInformation.networkStats();
-
   const dataTransfer = networkStats.reduce((acc, curr) => acc + curr.tx_sec, 0);
   const dataReceiving = networkStats.reduce(
     (acc, curr) => acc + curr.rx_sec,
     0
   );
-
   const dataTotalTransfer = networkStats.reduce(
     (acc, curr) => acc + curr.tx_bytes,
     0
@@ -117,7 +116,7 @@ export default async function getSystemStats(): Promise<string> {
   )}\nTotal Received: ${formatBytes(dataTotalReceiving, 2)}`;
   toSendData += SEPARATOR;
 
-  //   Uptime Information
+  // Uptime Information
   const time = systemInformation.time();
   toSendData += `Uptime: ${formatUptime(time.uptime)}`;
 
@@ -125,3 +124,9 @@ export default async function getSystemStats(): Promise<string> {
 
   return toSendData;
 }
+
+// To continuously update GPU stats (Example)
+setInterval(async () => {
+  const stats = await getSystemStats();
+  console.log(stats);  // Or send this to a channel or interface
+}, 5000); // Update every 5 seconds
