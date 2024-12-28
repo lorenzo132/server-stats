@@ -102,7 +102,7 @@ client.user?.setStatus("dnd");
 client.user?.setActivity({
   name: "watching the servers",
   type: ActivityType.Streaming,
-  url: "https://twitch.tv/kidweed132" // Replace with your streaming URL
+  url: "https://twitch.tv/kidw33d132" // Replace with your streaming URL
 });
 
   setInterval(getSystemInformationAndUpdateMessages, 5 * 1000);
