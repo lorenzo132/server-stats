@@ -98,11 +98,12 @@ async function getSystemInformationAndUpdateMessages() {
 client.on("ready", () => {
   console.log(`Logged in as ${client.user!.tag}!`);
 
-  client.user?.setStatus("dnd");
-  client.user?.setActivity({
-    name: "pycz.dev",
-    type: ActivityType.Competing,
-  });
+client.user?.setStatus("dnd");
+client.user?.setActivity({
+  name: "watching the servers",
+  type: ActivityType.Streaming,
+  url: "https://lvh.lol" // Replace with your streaming URL
+});
 
   setInterval(getSystemInformationAndUpdateMessages, 5 * 1000);
 });
